@@ -45,5 +45,16 @@
     "ts-node": "~3.2.0",
     "tslint": "~5.9.1",
     "typescript": "~2.5.3"
-  }
+  },
+  "description": "This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 1.6.4.",
+  "main": "karma.conf.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/beyondideas/emgat.git"
+  },
+  "author": "Carine Todmia",
+  "bugs": {
+    "url": "https://github.com/beyondideas/emgat/issues"
+  },
+  "homepage": "https://github.com/beyondideas/emgat#readme"
 }
