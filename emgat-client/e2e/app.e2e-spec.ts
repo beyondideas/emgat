@@ -1,6 +1,6 @@
 import { AppPage } from './app.po';
 
-describe('emgat App', () => {
+describe('emgat-client App', () => {
   let page: AppPage;
 
   beforeEach(() => {
