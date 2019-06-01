@@ -13,16 +13,18 @@ const tmKit = new Chatkit.default({
 });
 
 app.use(cors());
+app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
 app.post('/users', (req, res) => {
-    const { username } = req.body;
-
+    const username = req.body;
+    console.log('req.body',req.body,  username)
     tmKit.createUser({
         id: username,
         name: username
     })
     .then(() => {
+        console.log('dod we make it here')
         res.sendStatus(201);
     }).catch((err) => { 
         if (err.error === 'services/chatkit/user_already_exists') {
