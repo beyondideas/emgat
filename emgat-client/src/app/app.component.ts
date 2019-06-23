@@ -1,6 +1,10 @@
-import { Component } from '@angular/core';
-import Chatkit from '@pusher/chatkit-client';
+import { Injectable, Component } from '@angular/core';
 import axios from 'axios';
+import { HttpClient } from '@angular/common/http';
+
+import { Http, Headers, RequestOptions } from '@angular/http';
+import 'rxjs/add/operator/map';
+
 
 @Component({
   selector: 'app-root',
@@ -13,13 +17,18 @@ export class AppComponent {
   messages = [];
   users = [];
   currentUser: any;
+ 
+
+  constructor(
+    private _http: Http,
+    ){}
+
 
   _username: string = "";
   get username(): string {
     return this._username;
   }
   set username(value: string) {
-    console.log('when does this get set', value)
     this._username = value;
   }
 
@@ -32,15 +41,19 @@ export class AppComponent {
   }
 
   sendMessage() {
-    const { message, currentUser } = this;
-    currentUser.sendMessage({
-      text: message,
+    this.currentUser({
+      text: this.message,
       roomId: '19419373',
     });
-    this.message = '';
+    console.log('what is the current user', this.currentUser)
+
+    return this._http.post("/api/sendMessage", this.currentUser)
+      .map(result => {
+        return result.json();
+      })
   }
 
-  addUser() {
+  addUserToRoom() {
     let axiosConfig = {
       headers: {
           'Content-Type': 'application/json',
@@ -50,49 +63,22 @@ export class AppComponent {
     const username = { 
       "username": this._username
     };
-    console.log('this:',this)
     console.log('this is this: ', username);
-    axios.post('http://localhost:8080/users', username, axiosConfig)
-      .then(() => {
-        console.log('does this work')
-        const tokenProvider = new Chatkit.TokenProvider({
-          url: 'http://localhost:8080/authenticate'
-        });
 
-        const chatManager = new Chatkit.ChatManager({
-          instanceLocator: 'v1:us1:66d5095f-98c1-4fe5-a905-44bf16127d01',
-          userId: username,
-          tokenProvider
-        });
-
-        return chatManager
-          .connect()
-          .then(currentUser => {
-            currentUser.subscribeToRoom({
-              roomId: '19419373',
-              messageLimit: 100,
-              hooks: {
-                onMessage: message => {
-                  this.messages.push(message);
-                },
-                onPresenceChanged: (state, user) => {
-                  this.users = currentUser.users.sort((a, b) => {
-                    if (a.presence.state === 'online') return -1;
-
-                    return 1;
-                  });
-                },
-              },
-            });
-
-            this.currentUser = currentUser;
-            this.users = currentUser.users;
-          });
+    return this._http.post('http://localhost:4200/users/', username)
+      .map(result => {
+        console.log('this s the result', result)
+        return result.json();
       })
-        .catch((error) => {
+    
+  }
 
 
-          console.error('this error', error)
-        })
+  addUser() {
+    this.addUserToRoom().subscribe((res)=> {
+      console.log('this is the response', res)
+    }, (err) => {
+      console.log('this is the error', err)
+    })
   }
 }

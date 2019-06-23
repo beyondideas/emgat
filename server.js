@@ -4,46 +4,34 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const Chatkit = require('@pusher/chatkit-server');
+const path = require('path');
 
 const app = express();
 
-const tmKit = new Chatkit.default({
-    instanceLocator: process.env.INSTANCE_LOCATOR,
-    key: process.env.CHATKIT_KEY
-});
-
 app.use(cors());
-app.use(bodyParser.json());
+app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({extended: true}));
 
-app.post('/users', (req, res) => {
-    const username = req.body;
-    console.log('req.body',req.body,  username)
-    tmKit.createUser({
-        id: username,
-        name: username
-    })
-    .then(() => {
-        console.log('dod we make it here')
-        res.sendStatus(201);
-    }).catch((err) => { 
-        if (err.error === 'services/chatkit/user_already_exists') {
-            res.sendStatus(200);
-          } else {
-            res.status(err.status).json(err);
-          }
-    });
+const api = require('./server/routes/api.js');
+
+// Angular DIST output folder
+app.use(express.static(path.join(__dirname, 'dist')));
+// API location
+app.use('/api', api);
+// Send all other requests to the Angular app
+app.get('*', (req, res) => {
+    console.log('hey you are *')
+    res.sendFile(path.join(__dirname, 'emgat-client/src/index.html'));
 });
 
-app.post('/authenticate', (req, res) => {
-    const authData = tmKit.authenticate({
-        userId: req.query.user_id
-    });
-    res.status(authData.status).send(authData.body);
-});
 
-app.set('port', process.env.PORT || 8080);
+
+app.set('port', process.env.PORT || 4200);
 
 const server = app.listen(app.get('port'), () => {
     console.log(`EXPRESS RUNNING -> PORT ${server.address().port}`);
 });
+
+
+
+module.exports = server;
